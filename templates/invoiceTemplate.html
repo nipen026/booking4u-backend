@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Booking Invoice</title>
+</head>
+<body>
+    <h2>Your Booking Invoice</h2>
+    <p>Dear {{name}},</p>
+
+    <p>Attached is your invoice for your recent booking.</p>
+
+    <ul>
+        <li><b>Booking ID:</b> {{bookingId}}</li>
+        <li><b>Box Name:</b> {{boxName}}</li>
+        <li><b>Date:</b> {{date}}</li>
+        <li><b>Time:</b> {{startTime}} - {{endTime}}</li>
+        <li><b>Total Amount:</b> ₹{{amount}}</li>
+    </ul>
+
+    <p>We look forward to serving you again!</p>
+</body>
+</html>
