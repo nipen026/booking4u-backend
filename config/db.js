@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
         host: process.env.DB_HOST || 'localhost',
         dialect: 'postgres',
         port: parseInt(process.env.DB_PORT) || 5432,
-        force:true
+        logging: false,  // Disable logging for cleaner output
     }
 );
 
@@ -17,7 +17,4 @@ sequelize.authenticate()
     .then(() => console.log('✅ Database connected successfully'))
     .catch(err => console.error('❌ Database connection error:', err));
 
-// 🔹 Sync models and auto-create new fields
-sequelize.sync({ force: false }) // Set to true only if you want to reset the DB
-    .then(() => console.log('✅ Database synced successfully with updated fields'))
-    .catch(err => console.error('❌ Sync error:', err));
+module.exports = sequelize;  // ✅ Ensure this is exported
