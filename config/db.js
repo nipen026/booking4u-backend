@@ -18,7 +18,7 @@ sequelize.authenticate()
     .catch(err => console.error('❌ Database connection error:', err));
 
 // 🔹 Sync models and auto-create new fields
-sequelize.sync({ alter: true })
+sequelize.sync()
     .then(() => console.log('✅ Database synced successfully with updated fields'))
     .catch(err => console.error('❌ Sync error:', err));
 
