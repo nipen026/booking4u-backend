@@ -10,7 +10,7 @@ const sequelize = new Sequelize(
         dialect: 'postgres',
         port: parseInt(process.env.DB_PORT) || 5432,
         alter:true,
-        logging: true, // Enable for debugging SQL queries
+        force:true
     }
 );
 
