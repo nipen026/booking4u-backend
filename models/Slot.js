@@ -14,11 +14,19 @@ const Slot = sequelize.define('Slot', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'Users',  // Correct table name for reference
+            model: 'Users',
             key: 'id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
+    },
+    firstname: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    lastname: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     startTime: { 
         type: DataTypes.TIME, 

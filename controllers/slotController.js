@@ -6,11 +6,11 @@ const { v4: uuidv4 } = require('uuid');
 // ➕ Add Slot
 
 exports.addSlot = async (req, res) => {
-    const { boxId, startTime, endTime, date } = req.body;
+    const { boxId, startTime, endTime, date,firstname,lastname } = req.body;
     const userId = req.user.id; // Extract user ID from token
 
     try {
-        // Fetch user details to get role
+        // Fetch user details to get role and name
         const user = await User.findByPk(userId);
         if (!user) {
             return res.status(404).json({ status: false, message: '❌ User not found' });
@@ -18,15 +18,17 @@ exports.addSlot = async (req, res) => {
 
         const role = user.role; // Extract role from User model
 
-        // Generate a unique Slot ID
+        // Generate a unique Slot ID    
         const slotId = `SLOT-${uuidv4().slice(0, 8).toUpperCase()}`;
 
         // Create a new slot in the database
         const newSlot = await Slot.create({
             id: slotId,
             boxId,
-            userId, // Store user ID
-            role, // Store role dynamically
+            userId,
+            firstname, // Store first name
+            lastname, // Store last name
+            role,
             startTime,
             endTime,
             date

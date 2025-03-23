@@ -109,6 +109,49 @@ exports.getBookingById = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+exports.getAllBookingsForAdmin = async (req, res) => {
+    try {
+        const userId = req.user.id; // Extract user ID from token (assuming JWT middleware)
+        const userRole = req.user.role; // Extract user role (ensure role is stored in token)
+
+        // Check if user is an Admin (box owner)
+        if (userRole !== 'admin') {
+            return res.status(403).json({ status: false, message: 'Access denied. Only Admins can view bookings.' });
+        }
+
+        // Find the box associated with the Admin (box owner)
+        const box = await Box.findOne({ where: { userId } });
+        if (!box) {
+            return res.status(404).json({ status: false, message: 'No box found for this Admin' });
+        }
+
+        const { date } = req.query; // Optional date filter
+        const whereClause = { boxId: box.id }; // Filter bookings by Box ID
+
+        if (date) whereClause.date = date; // Apply date filter if provided
+
+        // Fetch all bookings for the Admin's box
+        const bookings = await Booking.findAll({
+            where: whereClause,
+            include: [
+                { model: User, attributes: ['username', 'email','firstName','lastName','phone'] },
+                { model: Box, attributes: ['name', 'location', 'pricePerHour'] },
+                { model: Slot, attributes: ['startTime', 'endTime', 'date'] }
+            ]
+        });
+
+        if (!bookings || bookings.length === 0) {
+            return res.status(200).json({ status: false, message: 'No bookings found for your box',bookings });
+        }
+
+        res.json({ status: true, bookings });
+    } catch (error) {
+        console.error('❌ Error fetching bookings:', error);
+        res.status(500).json({ status: false, error: error.message });
+    }
+};
+
 exports.getConfirmedBookings = async (req, res) => {
     try {
         const userId = req.user.id; // Extract user ID from token

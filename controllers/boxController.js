@@ -3,46 +3,51 @@ const Box = require('../models/Box');
 
 // ➕ Add Box
 exports.addBox = async (req, res) => {
-    const {
-        name,
-        location,
-        pricePerHour,
-        discountPrice,
-        details,
-        facilities,
-        slots,
-        googleMapLink,
-        landmark,
-        state,
-        city
-    } = req.body;
-
-    // Handle uploaded images
-    const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
-
     try {
+        const {
+            name,
+            location,
+            pricePerHour,
+            discountPrice,
+            details,
+            facilities,
+            slots,
+            googleMapLink,
+            landmark,
+            state,
+            city
+        } = req.body;
+
+        // Parse JSON string arrays (if sent as a string)
+        const parsedFacilities = Array.isArray(facilities) ? facilities : JSON.parse(facilities || '[]');
+        const parsedSlots = Array.isArray(slots) ? slots : JSON.parse(slots || '[]');
+
+        // Handle uploaded images
+        const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+
         const newBox = await Box.create({
             name,
             location,
             pricePerHour,
             discountPrice,
             details,
-            facilities: facilities ? facilities.split(',').map(f => f.trim()) : [],
-            slots: slots ? slots.split(',').map(s => s.trim()) : [],
+            facilities: parsedFacilities,
+            slots: parsedSlots,
             googleMapLink,
             landmark,
             state,
             city,
             images,
-            userId: req.user.id  // Store the user who added this box
+            userId: req.user.id
         });
 
-        res.status(201).json({ status:true,message: '✅ Box added successfully', newBox });
+        res.status(201).json({ status: true, message: '✅ Box added successfully', newBox });
     } catch (error) {
         console.error('❌ Error adding box:', error);
-        res.status(500).json({ status:false,error: error.message });
+        res.status(500).json({ status: false, error: error.message });
     }
 };
+
 
 
 
