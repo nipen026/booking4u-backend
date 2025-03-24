@@ -7,6 +7,8 @@ const { generateInvoice } = require('../invoice/invoiceService');
 const { sendEmail } = require('../email/emailService');
 const fs = require('fs');
 const path = require('path');
+const cron = require('node-cron');
+const { Op } = require('sequelize');
 
 
 
@@ -72,6 +74,37 @@ exports.addBooking = async (req, res) => {
     }
 };
 
+const deleteExpiredBookings = async () => {
+    try {
+        // Find all bookings that are still pending and older than 30 minutes
+        const expiredBookings = await Booking.findAll({
+            where: {
+                status: 'Pending',
+                createdAt: {
+                    [Op.lt]: new Date(Date.now() - 30 * 60 * 1000) // 30 minutes ago
+                }
+            }
+        });
+
+        for (const booking of expiredBookings) {
+            // Delete the associated slot
+            await Slot.destroy({ where: { id: booking.slotId } });
+
+            // Delete the booking itself
+            await Booking.destroy({ where: { id: booking.id } });
+
+            console.log(`🗑️ Deleted expired booking: ${booking.id}`);
+        }
+    } catch (error) {
+        console.error('❌ Error deleting expired bookings:', error);
+    }
+};
+
+
+cron.schedule('*/5 * * * *', async () => {
+    console.log('🔄 Running cron job to check for expired bookings...');
+    await deleteExpiredBookings();
+});
 
 // 📋 Get All Bookings
 exports.getAllBookings = async (req, res) => {
