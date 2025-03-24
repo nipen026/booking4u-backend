@@ -6,8 +6,8 @@ const Slot = sequelize.define('Slot', {
         type: DataTypes.STRING,
         primaryKey: true
     },
-    boxId: { 
-        type: DataTypes.INTEGER, 
+    boxId: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     userId: {
@@ -28,21 +28,22 @@ const Slot = sequelize.define('Slot', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    startTime: { 
-        type: DataTypes.TIME, 
-        allowNull: false 
+    price: { type: DataTypes.FLOAT, allowNull: true },
+    startTime: {
+        type: DataTypes.TIME,
+        allowNull: false
     },
-    endTime: { 
-        type: DataTypes.TIME, 
-        allowNull: false 
+    endTime: {
+        type: DataTypes.TIME,
+        allowNull: false
     },
-    date: { 
-        type: DataTypes.DATEONLY, 
-        allowNull: false 
+    date: {
+        type: DataTypes.DATEONLY,
+        allowNull: false
     },
-    status: { 
-        type: DataTypes.ENUM('available', 'Admin booked', 'Cancelled'), 
-        defaultValue: 'Admin booked' 
+    status: {
+        type: DataTypes.ENUM('available', 'Admin booked', 'Cancelled'),
+        defaultValue: 'Admin booked'
     }
 });
 

@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 // ➕ Add Slot
 
 exports.addSlot = async (req, res) => {
-    const { boxId, startTime, endTime, date,firstname,lastname } = req.body;
+    const { boxId, startTime, endTime, date,firstname,lastname,price } = req.body;
     const userId = req.user.id; // Extract user ID from token
 
     try {
@@ -26,6 +26,7 @@ exports.addSlot = async (req, res) => {
             id: slotId,
             boxId,
             userId,
+            price,
             firstname, // Store first name
             lastname, // Store last name
             role,
