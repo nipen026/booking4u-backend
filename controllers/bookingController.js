@@ -81,7 +81,7 @@ const deleteExpiredBookings = async () => {
             where: {
                 status: 'Pending',
                 createdAt: {
-                    [Op.lt]: new Date(Date.now() - 1 * 60 * 1000) // 30 minutes ago
+                    [Op.lt]: new Date(Date.now() - 30 * 60 * 1000) // 30 minutes ago
                 }
             }
         });
@@ -101,7 +101,7 @@ const deleteExpiredBookings = async () => {
 };
 
 
-cron.schedule('*/1 * * * *', async () => {
+cron.schedule('*/5 * * * *', async () => {
     console.log('🔄 Running cron job to check for expired bookings...');
     await deleteExpiredBookings();
 });
