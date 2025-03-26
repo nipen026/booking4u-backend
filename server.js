@@ -10,6 +10,7 @@ const userRoutes = require('./routes/user');
 const offerRoutes = require('./routes/offer');
 const paymentRoutes = require('./routes/payment');
 const contactRoutes = require('./routes/contact');
+const sheetRoutes = require('./routes/sheet');
 const cors = require('cors')
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/api/user',userRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/payment',paymentRoutes);
 app.use('/api/contact',contactRoutes);
+app.use('/api/sheet',sheetRoutes);
 // Database Sync and Server Start
 sequelize.sync({ force: false }).then(() => {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

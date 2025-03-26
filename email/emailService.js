@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-
+const path = require('path')
 // Email Transporter Configuration
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -13,10 +13,17 @@ const transporter = nodemailer.createTransport({
 exports.sendEmail = async (to, subject, htmlContent) => {
     try {
         const mailOptions = {
-            from: `"Box Cricket Booking" <${process.env.EMAIL_USER}>`,
+            from: `"booking4u.in" <${process.env.EMAIL_USER}>`,
             to,
             subject,
-            html: htmlContent
+            html: htmlContent,
+            attachments: [
+                {
+                    filename: 'email-banner.jpg',
+                    path: path.join(__dirname, '../templates/email-banner.jpg'),
+                    cid: 'emailBanner' // Content ID for inline image
+                }
+            ]
         };
 
         await transporter.sendMail(mailOptions);

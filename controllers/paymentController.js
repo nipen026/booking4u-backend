@@ -1,10 +1,12 @@
 const Razorpay = require('razorpay');
-const  Booking  = require('../models/Booking'); // Import Booking model
+const Booking = require('../models/Booking'); // Import Booking model
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 const Box = require('../models/Box');
 const Slot = require('../models/Slot');
-
+const moment = require('moment');
+const path = require('path');
+const fs = require('fs')
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_SECRET
@@ -22,7 +24,7 @@ exports.createOrder = async (req, res) => {
 
         // Update Booking Table with Name, Email, and Phone before payment
         await Booking.update(
-            { name, email, phone }, // Update these fields
+            { name, email, phone, price: amount, payment: paymentMethod }, // Update these fields
             { where: { id: bookingId } }
         );
 
@@ -42,6 +44,10 @@ exports.createOrder = async (req, res) => {
                 { status: "Confirmed" }, // Mark booking as confirmed
                 { where: { id: bookingId } }
             );
+            const updatedBooking = await Booking.findByPk(bookingId);
+
+            // Send invoice email
+            await sendInvoiceEmail(updatedBooking);
 
             return res.json({ status: true, message: "✅ Booking confirmed without online payment." });
         }
@@ -63,41 +69,52 @@ const transporter = nodemailer.createTransport({
 
 // Function to send an invoice email using your template
 const sendInvoiceEmail = async (booking) => {
-    // Fetch related box and slot details
-    const box = await Box.findByPk(booking.boxId);
-    const slot = await Slot.findByPk(booking.slotId);
+    try {
+        // Fetch related box and slot details
+        const box = await Box.findByPk(booking.boxId);
+        const slot = await Slot.findByPk(booking.slotId);
 
-    const emailTemplate = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Booking Confirmation</title>
-    </head>
-    <body>
-        <h2>Booking Confirmed!</h2>
-        <p>Dear ${booking.name},</p>
-        <p>Thank you for booking with us. Here are your booking details:</p>
+        // Format Date & Time
+        const formattedDate = slot ? moment(slot.date).format('DD MMM YYYY') : 'N/A';
+        const formattedStartTime = slot ? moment(slot.startTime, 'HH:mm:ss').format('hh:mm A') : 'N/A';
+        const formattedEndTime = slot ? moment(slot.endTime, 'HH:mm:ss').format('hh:mm A') : 'N/A';
 
-        <ul>
-            <li><b>Booking ID:</b> ${booking.id}</li>
-            <li><b>Box Name:</b> ${box ? box.name : 'N/A'}</li>
-            <li><b>Date:</b> ${slot ? slot.date : 'N/A'}</li>
-            <li><b>Time:</b> ${slot ? slot.startTime : 'N/A'} - ${slot ? slot.endTime : 'N/A'}</li>
-        </ul>
+        // Read Email Template
+        const templatePath = path.join(__dirname, '../templates/bookingConfirmation.html');
+        let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
-        <p>We look forward to seeing you!</p>
-    </body>
-    </html>
-    `;
+        // Replace Placeholders with Dynamic Values
+        emailTemplate = emailTemplate
+            .replace('{{NAME}}', booking.name)
+            .replace('{{BOOKING_ID}}', booking.id)
+            .replace('{{BOX_NAME}}', box ? box.name : 'N/A')
+            .replace('{{DATE}}', formattedDate)
+            .replace('{{START_TIME}}', formattedStartTime)
+            .replace('{{END_TIME}}', formattedEndTime)
+            .replace('{{PRICE}}', booking.price)
+            .replace('{{PAYMENT_METHOD}}', booking.payment);
 
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: booking.email, // Send to the user's email
-        subject: '📜 Booking Confirmation - Box Cricket',
-        html: emailTemplate
-    };
+        // Email Configuration
+        const mailOptions = {
+            from: `"booking4u.in" <${process.env.EMAIL_USER}>`,
+            to: booking.email, // Send to the user's email
+            subject: '🥎 Booking Confirmation - booking4u.in',
+            html: emailTemplate,
+            attachments: [
+                {
+                    filename: 'email-banner.jpg',
+                    path: path.join(__dirname, '../templates/email-banner.jpg'),
+                    cid: 'emailBanner' // Content ID for inline image
+                }
+            ]
+        };
 
-    await transporter.sendMail(mailOptions);
+        // Send Email
+        await transporter.sendMail(mailOptions);
+        console.log('✅ Booking confirmation email sent to:', booking.email);
+    } catch (error) {
+        console.error('❌ Error sending booking confirmation email:', error);
+    }
 };
 
 // Handle Payment Success & Update Booking Status

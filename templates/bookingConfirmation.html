@@ -1,20 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Booking Confirmation</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .header { background: #fff; color: #000; padding: 15px; text-align: center; font-size: 22px; font-weight: bold; }
+        .banner img { width: 100%; height: auto; display: block; }
+        .content { padding: 20px; color: #333; line-height: 1.6; text-align: center; }
+        .details { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px; text-align: left; }
+        .button { display: inline-block; background: #2b8a3e; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-size: 16px; margin-top: 15px; }
+        .footer { text-align: center; font-size: 12px; color: #777; padding: 15px; background: #eeeeee; border-top: 1px solid #dddddd; }
+    </style>
 </head>
 <body>
-    <h2>Booking Confirmed!</h2>
-    <p>Dear {{name}},</p>
-    <p>Thank you for booking with us. Here are your booking details:</p>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">🏏 booking<span style="color: #2b8a3e;">4</span><span style="color: #000;">u.in</span> 🥎</div>
 
-    <ul>
-        <li><b>Booking ID:</b> {{bookingId}}</li>
-        <li><b>Box Name:</b> {{boxName}}</li>
-        <li><b>Date:</b> {{date}}</li>
-        <li><b>Time:</b> {{startTime}} - {{endTime}}</li>
-    </ul>
+        <!-- Banner -->
+        <div class="banner">
+            <img src="cid:emailBanner" alt="Cricket Match">
+        </div>
 
-    <p>We look forward to seeing you!</p>
+        <!-- Content -->
+        <div class="content">
+            <p>Hi <b>{{NAME}}</b>,</p>
+            <p>Your box cricket booking has been successfully confirmed. Get ready for an exciting match! 🏆</p>
+            
+            <div class="details">
+                <p><b>🏟 Box Name:</b> {{BOX_NAME}}</p>
+                <p><b>📅 Date:</b> {{DATE}}</p>
+                <p><b>⏰ Time Slot:</b> {{START_TIME}} - {{END_TIME}}</p>
+                <p><b>💰 Total Price:</b> ₹{{PRICE}}</p>
+            </div>
+
+            <button class="button">View Booking</a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            ⚡ See you on the field! For any queries, contact us at <b>contact.booking4u@gmail.com</b>
+        </div>
+    </div>
 </body>
 </html>

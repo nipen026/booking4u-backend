@@ -19,14 +19,20 @@ const Booking = sequelize.define('Booking', {
         allowNull: false,
         references: { model: Box, key: 'id' }
     },
+
     slotId: {
         type: DataTypes.STRING,
-        allowNull: true,  // Ensure slotId can be NULL
+        allowNull: true,
         references: { model: Slot, key: 'id' }
-    },    
+    },   
+    payment: { type: DataTypes.STRING, allowNull: true }, 
     name: { type: DataTypes.STRING, allowNull: true },
     email: { type: DataTypes.STRING, allowNull: true },
     phone: { type: DataTypes.STRING, allowNull: true },
+    price: { 
+        type: DataTypes.FLOAT,  // ✅ Added Price Column
+        allowNull: true 
+    },
     status: {
         type: DataTypes.ENUM('Pending', 'Confirmed', 'Cancelled'),
         defaultValue: 'Pending'

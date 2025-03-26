@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
 const { Op } = require('sequelize');
+const moment = require('moment')
 
 
 
@@ -251,12 +252,21 @@ exports.cancelBooking = async (req, res) => {
 
         // Update Booking Status to "Cancelled"
         await booking.update({ status: 'Cancelled' });
-
+   // Format Date & Time
+        const formattedDate = booking.Slot ? moment(booking.Slot.date).format('DD MMM YYYY') : 'N/A';
+        const formattedStartTime = booking.Slot ? moment(booking.Slot.startTime, 'HH:mm:ss').format('hh:mm A') : 'N/A';
+        const formattedEndTime = booking.Slot ? moment(booking.Slot.endTime, 'HH:mm:ss').format('hh:mm A') : 'N/A';
         // Load and Replace Email Template
         const templatePath = path.join(__dirname, '../templates/bookingCancellation.html');
         const templateContent = fs.readFileSync(templatePath, 'utf8')
-            .replace('{{name}}', booking.User.username)
-            .replace('{{bookingId}}', booking.id);
+            .replace('{{NAME}}', booking.name)
+            .replace('{{BOOKING_ID}}', booking.id)
+            .replace('{{BOX_NAME}}', booking.Box.name ? booking.Box.name : 'N/A')
+            .replace('{{DATE}}', formattedDate)
+            .replace('{{START_TIME}}', formattedStartTime)
+            .replace('{{END_TIME}}', formattedEndTime)
+            .replace('{{PRICE}}', booking.price)
+            .replace('{{PAYMENT_METHOD}}', booking.payment);
 
         // Send Cancellation Email
         await sendEmail(booking.User.email, 'Booking Cancellation', templateContent);
