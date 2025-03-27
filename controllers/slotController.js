@@ -1,12 +1,14 @@
 const { Op } = require('sequelize');  // Import Sequelize operators
 const Slot = require('../models/Slot');
 const User = require('../models/User');
+const Booking = require('../models/Booking');
+const Box = require('../models/Box');
 const { v4: uuidv4 } = require('uuid');
 
 // ➕ Add Slot
 
 exports.addSlot = async (req, res) => {
-    const { boxId, startTime, endTime, date,firstname,lastname,price } = req.body;
+    const { boxId, startTime, endTime, date, firstname, lastname, price, payment, type, bookername } = req.body;
     const userId = req.user.id; // Extract user ID from token
 
     try {
@@ -21,19 +23,54 @@ exports.addSlot = async (req, res) => {
         // Generate a unique Slot ID    
         const slotId = `SLOT-${uuidv4().slice(0, 8).toUpperCase()}`;
 
+        // Determine slot status
+
         // Create a new slot in the database
         const newSlot = await Slot.create({
             id: slotId,
             boxId,
             userId,
             price,
-            firstname, // Store first name
-            lastname, // Store last name
+            bookername,
+            firstname,
+            lastname,
             role,
             startTime,
             endTime,
+            payment,
             date
         });
+
+        // 🔹 If type is "manual", create a booking automatically
+        if (type === "manual") {
+            // Generate a unique Booking ID
+            const bookingId = `BOOKING-${uuidv4().slice(0, 8).toUpperCase()}`;
+
+            // Get the box price
+            const box = await Box.findByPk(boxId);
+            if (!box) {
+                return res.status(404).json({ status: false, message: '❌ Box not found' });
+            }
+            const amount = price;
+
+            // Create a new booking linked to the slot
+            const newBooking = await Booking.create({
+                id: bookingId,
+                userId,
+                boxId,
+                name: `${firstname} ${lastname}`,
+                slotId: newSlot.id, // Link slot ID
+                price: amount,
+                payment,
+                status: 'Confirmed' // Mark as confirmed since it's manual
+            });
+
+            return res.status(201).json({ 
+                message: '✅ Slot and Booking added successfully', 
+                newSlot, 
+                newBooking 
+            });
+        }
 
         res.status(201).json({ message: '✅ Slot added successfully', newSlot });
 
@@ -42,6 +79,7 @@ exports.addSlot = async (req, res) => {
         res.status(500).json({ status: false, error: error.message });
     }
 };
+
 
 
 // 📋 Get All Slots

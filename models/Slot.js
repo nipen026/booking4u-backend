@@ -28,7 +28,19 @@ const Slot = sequelize.define('Slot', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    price: { type: DataTypes.FLOAT, allowNull: true },
+    price: { 
+        type: DataTypes.FLOAT, 
+        allowNull: true 
+    },
+    payment: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'cash'
+    },
+    bookername: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     startTime: {
         type: DataTypes.TIME,
         allowNull: false
