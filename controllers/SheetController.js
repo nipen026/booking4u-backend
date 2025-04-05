@@ -163,7 +163,7 @@ exports.exportBookingData = async (req, res) => {
         while (currentDate <= endMoment) {
             dates.push(currentDate.format('YYYY-MM-DD'));
             currentDate.add(1, 'day');
-        }
+        }   
 
         // Fetch bookings within date range
         const bookings = await Booking.findAll({
@@ -207,11 +207,13 @@ exports.exportBookingData = async (req, res) => {
                 status: booking.status,
                 paymentMethod: booking.payment,
                 boxName: boxes.find(box => box.id === booking.boxId)?.name || "Unknown Box",
-                turfName: turf?.turfname || "Unknown Turf"
+                boxId: boxes.find(box => box.id === booking.boxId)?.id,
+                turfName: turf?.turfname || "Unknown Turf",
+                turfId: turf?.id 
             };
         });
 
-        const boxDetails = boxes.map(box => ({ name: box.name }));
+        const boxDetails = boxes.map(box => ({ name: box.name , id : box.id }));
 
         return res.json({
             status: true,

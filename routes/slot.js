@@ -20,7 +20,7 @@ router.get('/', getAllSlots);
 
 // 🔎 Get Slot by ID
 router.get('/:id',verifyToken, getSlotById);
-router.get('/getSlots/:id/:date', getSlotByBoxId);
+router.get('/getSlots/:id/:date/:turfId', getSlotByBoxId);
 router.get('/getPendingSlots/:id/:date', getPendingSlotsByDate);
 
 // ✏️ Update Slot (Admin Only)

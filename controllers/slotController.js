@@ -138,11 +138,12 @@ exports.getSlotById = async (req, res) => {
 };
 
 exports.getSlotByBoxId = async (req, res) => {
-    const { id, date } = req.params;  // Extract boxId and date from params
+    const { id, date,turfId } = req.params;  // Extract boxId and date from params
 
     try {
         const slot = await Slot.findAll({
             where: {
+                turfId: turfId,
                 boxId: id,
                 date: date,
                 status: { [Op.or]: ['available', 'Admin booked'] }  // Filter only available and booked slots
