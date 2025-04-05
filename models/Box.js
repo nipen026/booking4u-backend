@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const Turf = require('./Turf');
 
 const Box = sequelize.define('Box', {
     name: { type: DataTypes.STRING, allowNull: false },
@@ -8,7 +9,7 @@ const Box = sequelize.define('Box', {
     discountPrice: { type: DataTypes.FLOAT, allowNull: true }, // New Field
     details: { type: DataTypes.TEXT, allowNull: false },
     facilities: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: false },
-    slots: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: false },
+    slots: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: true },
     images: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: true },
     googleMapLink: { type: DataTypes.TEXT, allowNull: true }, // Changed to TEXT
     landmark: { type: DataTypes.STRING, allowNull: true },   

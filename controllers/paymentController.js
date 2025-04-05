@@ -16,37 +16,51 @@ exports.createOrder = async (req, res) => {
     const { bookingId, amount, name, email, phone, paymentMethod, currency = "INR" } = req.body;
 
     try {
-        // Validate Booking ID
+        // ✅ Validate Booking ID
         const booking = await Booking.findByPk(bookingId);
         if (!booking) {
             return res.status(404).json({ status: false, message: "❌ Booking not found" });
         }
 
-        // Update Booking Table with Name, Email, and Phone before payment
+        // ✅ Update Booking Table with latest details
         await Booking.update(
-            { name, email, phone, price: amount, payment: paymentMethod }, // Update these fields
+            { name, email, phone, price: amount, payment: paymentMethod },
             { where: { id: bookingId } }
         );
 
-        // Check Payment Method
+        // ✅ Update corresponding Slot (if slotId exists)
+        if (booking.slotId) {
+            await Slot.update(
+                {
+                    firstname: name?.split(" ")[0] || null,
+                    lastname: name?.split(" ")[1] || null,
+                    bookername: name,
+                    price: amount,
+                    payment: paymentMethod
+                },
+                { where: { id: booking.slotId } }
+            );
+        }
+
+        // ✅ Razorpay Order Flow
         if (paymentMethod === "prepaid") {
-            // Create Razorpay Order
             const order = await razorpay.orders.create({
-                amount: amount * 100, // Convert to paise
+                amount: amount * 100,
                 currency,
                 receipt: `receipt_${Date.now()}`
             });
 
             return res.json({ status: true, data: order });
         } else {
-            // If payment is not prepaid, directly confirm the booking
+            // ✅ Mark booking as confirmed if not prepaid
             await Booking.update(
-                { status: "Confirmed" }, // Mark booking as confirmed
+                { status: "Confirmed" },
                 { where: { id: bookingId } }
             );
+
             const updatedBooking = await Booking.findByPk(bookingId);
 
-            // Send invoice email
+            // ✅ Send Invoice Email
             await sendInvoiceEmail(updatedBooking);
 
             return res.json({ status: true, message: "✅ Booking confirmed without online payment." });
@@ -57,6 +71,7 @@ exports.createOrder = async (req, res) => {
         res.status(500).json({ status: false, error: "Booking processing failed" });
     }
 };
+
 
 // Handle Payment Success & Update Booking Status
 const transporter = nodemailer.createTransport({

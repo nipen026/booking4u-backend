@@ -5,7 +5,8 @@ const {
     getSlotById, 
     updateSlot, 
     deleteSlot, 
-    getSlotByBoxId
+    getSlotByBoxId,
+    getPendingSlotsByDate
 } = require('../controllers/slotController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 
@@ -20,6 +21,7 @@ router.get('/', getAllSlots);
 // 🔎 Get Slot by ID
 router.get('/:id',verifyToken, getSlotById);
 router.get('/getSlots/:id/:date', getSlotByBoxId);
+router.get('/getPendingSlots/:id/:date', getPendingSlotsByDate);
 
 // ✏️ Update Slot (Admin Only)
 router.patch('/update/:id', verifyToken, updateSlot);

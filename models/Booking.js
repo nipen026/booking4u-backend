@@ -3,6 +3,7 @@ const sequelize = require('../config/db');
 const User = require('./User');
 const Box = require('./Box');
 const Slot = require('./Slot');
+const Turf = require('./Turf');
 
 const Booking = sequelize.define('Booking', {
     id: {
@@ -19,7 +20,11 @@ const Booking = sequelize.define('Booking', {
         allowNull: false,
         references: { model: Box, key: 'id' }
     },
-
+    turfId: {  // ✅ Added Turf ID
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: Turf, key: 'id' }
+    },
     slotId: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -43,5 +48,6 @@ const Booking = sequelize.define('Booking', {
 Booking.belongsTo(User, { foreignKey: 'userId' });
 Booking.belongsTo(Box, { foreignKey: 'boxId' });
 Booking.belongsTo(Slot, { foreignKey: 'slotId' });
+Booking.belongsTo(Turf, { foreignKey: 'turfId' });
 
 module.exports = Booking;

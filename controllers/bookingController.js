@@ -9,14 +9,15 @@ const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
 const { Op } = require('sequelize');
-const moment = require('moment')
+const moment = require('moment');
+const Turf = require('../models/Turf');
 
 
 
 exports.addBooking = async (req, res) => {
     try {
         const userId = req.user.id; // Extract user ID from token
-        const { boxId, startTime, endTime, date } = req.body;
+        const { boxId, startTime, endTime, date,turfId } = req.body;
 
         // Fetch user details to get role
         const user = await User.findByPk(userId);
@@ -42,6 +43,7 @@ exports.addBooking = async (req, res) => {
             slot = await Slot.create({
                 id: `SLOT-${uuidv4().slice(0, 8).toUpperCase()}`,
                 boxId,
+                turfId,
                 userId, // Store user ID
                 role,  // Store user role
                 startTime,
@@ -57,6 +59,7 @@ exports.addBooking = async (req, res) => {
         const newBooking = await Booking.create({
             id: bookingId,
             userId,
+            turfId,
             boxId,
             slotId: slot.id, // Link to dynamically created slot
             amount,
@@ -132,7 +135,8 @@ exports.getBookingById = async (req, res) => {
             include: [
                 { model: User, attributes: ['username', 'email'] },
                 { model: Box, attributes: ['name', 'location','pricePerHour'] },
-                { model: Slot, attributes: ['startTime', 'endTime','date'] }
+                { model: Slot, attributes: ['startTime', 'endTime','date'] },
+                { model: Turf, attributes: ['turfname'] }
             ]
         });
 
@@ -171,7 +175,8 @@ exports.getAllBookingsForAdmin = async (req, res) => {
             include: [
                 { model: User, attributes: ['username', 'email','firstName','lastName','phone'] },
                 { model: Box, attributes: ['name', 'location', 'pricePerHour'] },
-                { model: Slot, attributes: ['startTime', 'endTime', 'date'] }
+                { model: Slot, attributes: ['startTime', 'endTime', 'date'] },
+                { model: Turf, attributes: ['turfname'] }
             ]
         });
 
@@ -195,7 +200,8 @@ exports.getConfirmedBookings = async (req, res) => {
             include: [
                 { model: User, attributes: ['username', 'email'] },
                 { model: Box, attributes: ['name', 'location', 'pricePerHour'] },
-                { model: Slot, attributes: ['startTime', 'endTime', 'date'] }
+                { model: Slot, attributes: ['startTime', 'endTime', 'date'] },
+                { model: Turf, attributes: ['turfname'] }
             ]
         });
 

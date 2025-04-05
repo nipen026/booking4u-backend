@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const Turf = require('./Turf');
 
 const Slot = sequelize.define('Slot', {
     id: {
@@ -20,6 +21,16 @@ const Slot = sequelize.define('Slot', {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
     },
+    turfId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'Turfs',
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+    },
     firstname: {
         type: DataTypes.STRING,
         allowNull: true
@@ -29,6 +40,10 @@ const Slot = sequelize.define('Slot', {
         allowNull: true
     },
     price: { 
+        type: DataTypes.FLOAT, 
+        allowNull: true 
+    },
+    advancepayment: { 
         type: DataTypes.FLOAT, 
         allowNull: true 
     },
@@ -60,3 +75,5 @@ const Slot = sequelize.define('Slot', {
 });
 
 module.exports = Slot;
+
+Slot.belongsTo(Turf, { foreignKey: 'turfId' });
