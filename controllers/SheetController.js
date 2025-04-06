@@ -206,9 +206,9 @@ exports.exportBookingData = async (req, res) => {
                 price,
                 status: booking.status,
                 paymentMethod: booking.payment,
-                boxName: boxes.find(box => box.id === booking.boxId)?.name || "Unknown Box",
+                boxName: boxes.find(box => box.id === booking.boxId)?.name ,
                 boxId: boxes.find(box => box.id === booking.boxId)?.id,
-                turfName: turf?.turfname || "Unknown Turf",
+                turfName: turf?.turfname,
                 turfId: turf?.id 
             };
         });

@@ -21,7 +21,7 @@ router.get('/', getAllSlots);
 // 🔎 Get Slot by ID
 router.get('/:id',verifyToken, getSlotById);
 router.get('/getSlots/:id/:date/:turfId', getSlotByBoxId);
-router.get('/getPendingSlots/:id/:date', getPendingSlotsByDate);
+router.get('/getPendingSlots/:boxId/:turfId/:date', getPendingSlotsByDate);
 
 // ✏️ Update Slot (Admin Only)
 router.patch('/update/:id', verifyToken, updateSlot);

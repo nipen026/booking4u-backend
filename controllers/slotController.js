@@ -172,62 +172,69 @@ const generateHourlySlots = (start = 6, end = 23, date) => {
 
 
 exports.getPendingSlotsByDate = async (req, res) => {
-    const { id, date } = req.params;
+    const { boxId, turfId, date } = req.params;
 
     try {
-        const turfs = await Turf.findAll({ where: { boxId: id } });
+        // Find turf
+        const turf = await Turf.findOne({ where: { id: turfId, boxId } });
 
-        if (!turfs || turfs.length === 0) {
-            return res.status(404).json({ status: false, message: '❌ No turfs found under this box' });
+        if (!turf) {
+            return res.status(404).json({ status: false, message: '❌ Turf not found under this box' });
         }
 
+        const turfSlotList = Array.isArray(turf.turfSlots) ? [...turf.turfSlots] : [];
+
+        // Fetch all booked slots for this turf on given date
         const bookedSlots = await Slot.findAll({
-            where: { boxId: id, date }
+            where: {
+                boxId,
+                turfId,
+                date
+            }
         });
 
-        const pendingSlots = [];
+        // Helper: convert "hh:mm A" to minutes
+        const toMinutes = (timeStr) => {
+            const [hourMin, period] = timeStr.split(' ');
+            let [hour, min] = hourMin.split(':').map(Number);
+            if (period === 'PM' && hour !== 12) hour += 12;
+            if (period === 'AM' && hour === 12) hour = 0;
+            return hour * 60 + min;
+        };
 
-        for (const turf of turfs) {
-            let turfSlotList = Array.isArray(turf.turfSlots) ? [...turf.turfSlots] : [];
-
-            // Convert turf slots to Dayjs objects for filtering
-            const turfSlotTimes = turfSlotList.map(slot =>
-                dayjs(slot, 'hh:mm A')
-            );
-
-            // Filter out booked slots
-            const filteredSlots = turfSlotTimes.filter(turfSlotTime => {
-                const isBooked = bookedSlots.some(booked => {
-                    const bookedStart = dayjs(booked.startTime, 'HH:mm:ss');
-                    const bookedEnd = dayjs(booked.endTime, 'HH:mm:ss');
-
-                    // Remove slot if it's in the booked range
-                    return (
-                        turfSlotTime.isSame(bookedStart) ||
-                        (turfSlotTime.isAfter(bookedStart) && turfSlotTime.isBefore(bookedEnd))
-                    );
-                });
-
-                return !isBooked;
+        const availableSlots = turfSlotList.filter(slotStr => {
+            const currentSlotTime = dayjs(slotStr, 'hh:mm A');
+            const nextSlotTime = currentSlotTime.add(1, 'hour'); // 1-hour slots assumed
+            const currentSlotFormatted = currentSlotTime.format('HH:mm:ss');
+            const nextSlotFormatted = nextSlotTime.format('HH:mm:ss');
+        
+            const isBooked = bookedSlots.some(slot => {
+                const bookedStart = slot.startTime;
+                const bookedEnd = slot.endTime;
+        
+                return (
+                    (currentSlotFormatted >= bookedStart && currentSlotFormatted <= bookedEnd) ||
+                    (nextSlotFormatted > bookedStart && nextSlotFormatted <= bookedEnd) ||
+                    (bookedStart >= currentSlotFormatted && bookedEnd <= nextSlotFormatted)
+                );
             });
+        
+            return !isBooked;
+        });
 
-            // Convert back to original string format
-            const available = filteredSlots.map(t =>    t.format('hh:mm A'),);
-
-            pendingSlots.push(...available);
-        }
-
-        if (pendingSlots.length === 0) {
+        if (availableSlots.length === 0) {
             return res.status(200).json({ status: false, slots: [], message: '❌ No available slots for this date' });
         }
 
-        res.json({ status: true, slots: pendingSlots });
+        res.json({ status: true, slots: availableSlots });
 
     } catch (error) {
         console.error('❌ Error fetching pending slots:', error);
         res.status(500).json({ status: false, error: error.message });
     }
 };
+
+
 
 
 
